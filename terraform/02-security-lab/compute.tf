@@ -38,3 +38,36 @@ output "bastion_public_ip" {
   value       = google_compute_instance.bastion_host.network_interface[0].access_config[0].nat_ip
   description = "The public IP address of the Bastion Host (DVWA)"
 }
+
+# INTERNAL TARGET SERVER (No Public IP)
+resource "google_compute_instance" "target_server" {
+  name         = "target-internal"
+  machine_type = "e2-micro"
+  zone         = "europe-central2-a"
+
+  # Tag for potential future internal firewall rules
+  tags = ["target"]
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-12"
+    }
+  }
+
+  network_interface {
+    # Placing it in the internal subnet
+    subnetwork = google_compute_subnetwork.internal_subnet.id
+    
+    # INTENTIONAL: No access_config block here 
+    # This ensures the machine gets NO public IP address
+  }
+
+  # Startup script installs audit daemon for OS-level threat hunting
+  metadata_startup_script = <<-EOF
+    #!/bin/bash
+    apt-get update
+    apt-get install -y auditd audispd-plugins
+    systemctl enable auditd
+    systemctl start auditd
+  EOF
+}
