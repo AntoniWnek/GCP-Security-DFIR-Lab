@@ -10,7 +10,7 @@ terraform {
 
 # PROVIDER BLOCK: Authentication and region setup
 provider "google" {
-  project = "project-61690e78-c96f-4e67-82a" 
+  project = var.project_id 
   region  = "europe-central2" 
 }
 
