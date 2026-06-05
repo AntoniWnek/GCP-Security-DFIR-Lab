@@ -1,6 +1,8 @@
 import requests
 import random
 import time
+import sys
+import os
 
 # Browser set (Windows, macOS, Linux)
 USER_AGENTS = [
@@ -28,7 +30,14 @@ CREDENTIALS = {
     "test": "test"
 }
 
-TARGET_IP = "BASTIONIP"
+# Fetch Target IP from Environment Variable instead of hardcoding
+TARGET_IP = os.environ.get("BASTION_IP")
+
+# Validation check
+if not TARGET_IP:
+    print("[!] FATAL: BASTION_IP environment variable is not set.")
+    sys.exit(1)
+
 base_url = f"http://{TARGET_IP}"
 
 print("[*] Starting Benign Traffic Generator...")
