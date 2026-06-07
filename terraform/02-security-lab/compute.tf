@@ -5,11 +5,6 @@ resource "google_service_account" "honeypot_sa" {
   description  = "Empty Service Account for machines to prevent Metadata SSRF attacks"
 }
 
-
-
-
-
-
 # BASTION HOST / HONEYPOT (DMZ)
 resource "google_compute_instance" "bastion_host" {
   name         = "bastion-dvwa"
@@ -39,10 +34,6 @@ resource "google_compute_instance" "bastion_host" {
     email  = google_service_account.honeypot_sa.email
     scopes = ["cloud-platform"]
   }
-
-
-
-
 
   # Automates the deployment of a vulnerable web app for testing
   metadata_startup_script = <<-EOF
@@ -90,12 +81,25 @@ resource "google_compute_instance" "target_server" {
     scopes = ["cloud-platform"]
   }
 
-  # Startup script installs audit daemon for OS-level threat hunting
+# Startup script installs audit daemon and provisions a canary file
   metadata_startup_script = <<-EOF
     #!/bin/bash
+    # Update package lists and install linux audit framework
     apt-get update
     apt-get install -y auditd audispd-plugins
     systemctl enable auditd
     systemctl start auditd
+
+    # HONEYTOKEN: Create a fake backup directory and insert dummy credentials
+    mkdir -p /home/admin/backup
+    echo "root_db: T@jneH@slo123!" > /home/admin/backup/hasla.txt
+    echo "ssh_prod: ProdKey2025" >> /home/admin/backup/hasla.txt
+    chmod 644 /home/admin/backup/hasla.txt
+
+    # DFIR ALERT: Inject a persistent auditd rule to monitor the honeytoken
+    # -w monitors the file path
+    # -p rwa triggers on Read, Write, or Attribute changes
+    # -k assigns a unique filter key for SIEM/BigQuery indexing
+    auditctl -w /home/admin/backup/hasla.txt -p rwa -k HONEYTOKEN_TRIGGERED
   EOF
 }
