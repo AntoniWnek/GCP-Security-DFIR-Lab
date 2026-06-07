@@ -1,3 +1,15 @@
+# LEAST PRIVILEGE: Empty Service Account for machines to prevent Metadata SSRF attacks
+resource "google_service_account" "honeypot_sa" {
+  account_id   = "honeypot-sa"
+  display_name = "Honeypot Minimal Service Account"
+  description  = "Empty Service Account for machines to prevent Metadata SSRF attacks"
+}
+
+
+
+
+
+
 # BASTION HOST / HONEYPOT (DMZ)
 resource "google_compute_instance" "bastion_host" {
   name         = "bastion-dvwa"
@@ -21,6 +33,16 @@ resource "google_compute_instance" "bastion_host" {
       # Leaving this block empty tells GCP to assign a dynamic public IP
     }
   }
+
+# Attaching an empty service account
+  service_account {
+    email  = google_service_account.honeypot_sa.email
+    scopes = ["cloud-platform"]
+  }
+
+
+
+
 
   # Automates the deployment of a vulnerable web app for testing
   metadata_startup_script = <<-EOF
@@ -60,6 +82,12 @@ resource "google_compute_instance" "target_server" {
     
     # INTENTIONAL: No access_config block here 
     # This ensures the machine gets NO public IP address
+  }
+
+# Attaching an empty service account
+  service_account {
+    email  = google_service_account.honeypot_sa.email
+    scopes = ["cloud-platform"]
   }
 
   # Startup script installs audit daemon for OS-level threat hunting
