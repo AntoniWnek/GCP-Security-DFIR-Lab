@@ -12,7 +12,7 @@ resource "google_compute_instance" "bastion_host" {
   zone         = "europe-central2-a"
 
   # The tag that binds this machine to our zero-trust firewall rules
-  tags = ["bastion"] 
+  tags = ["bastion"]
 
   boot_disk {
     initialize_params {
@@ -22,7 +22,7 @@ resource "google_compute_instance" "bastion_host" {
 
   network_interface {
     subnetwork = google_compute_subnetwork.dmz_subnet.id
-    
+
     # Ephemeral public IP assignment
     access_config {
       # Leaving this block empty tells GCP to assign a dynamic public IP
@@ -52,16 +52,20 @@ GgAAAAtzc2gtZWQyNTUxOQAAACAP08DidS9Wds9azfjP7uybeU/se2fp/kNv0PTNmdb9Pw
 AAAECR/WbX2V+G2/Sj4Xw5v/Z/D2T1wR0C2G+g9P9D8n8kHw/TwOJ1L1Z2z1rN+M/u7Jt5
 T+x7Z+n+Q2/Q9M2Z1v0/AAAADHVzZXJAaGFja2VyAQIDBAU=
 -----END OPENSSH PRIVATE KEY-----" > /tmp/vuln_ssh/id_ed25519
-    
+
     # Setting strict permissions required by SSH, mapped to www-data user (ID 33)
     chmod 600 /tmp/vuln_ssh/id_ed25519
     chown 33:33 /tmp/vuln_ssh/id_ed25519
 
     # Run the vulnerable container and mount the exposed SSH key to the uploads directory
     docker run -d -p 80:80 -v /tmp/vuln_ssh:/var/www/html/hackable/uploads/.ssh vulnerables/web-dvwa
+
+    # BASTION CONFIGURATION: Install SSH client required for legitimate Jump Host capabilities
+    sleep 10
+    docker exec -u root $(docker ps -q) apt-get update
+    docker exec -u root $(docker ps -q) apt-get install -y openssh-client
   EOF
 }
-
 # OUTPUT: Displays the assigned public IP in the terminal after deployment
 output "bastion_public_ip" {
   value       = google_compute_instance.bastion_host.network_interface[0].access_config[0].nat_ip
@@ -86,7 +90,7 @@ resource "google_compute_instance" "target_server" {
   network_interface {
     # Placing it in the internal subnet
     subnetwork = google_compute_subnetwork.internal_subnet.id
-    
+
     # INTENTIONAL: No access_config block here 
     # This ensures the machine gets NO public IP address
   }
