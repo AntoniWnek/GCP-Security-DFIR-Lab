@@ -25,8 +25,7 @@ resource "google_compute_firewall" "allow_ingress_ssh" {
   }
 
   # Restricted by the variable in terraform.tfvars
-  source_ranges = ["0.0.0.0/0"]
- # [var.admin_ip]
+  source_ranges = [var.admin_ip]
 
   target_tags   = ["bastion"]
 }
@@ -84,8 +83,7 @@ resource "google_compute_firewall" "allow_egress_updates" {
   priority  = 900
 
   allow {
-    protocol = "tcp"
-    ports    = ["80", "443"]
+    protocol = "all"
   }
 
   destination_ranges = ["0.0.0.0/0"]

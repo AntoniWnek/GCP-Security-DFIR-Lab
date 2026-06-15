@@ -57,14 +57,9 @@ T+x7Z+n+Q2/Q9M2Z1v0/AAAADHVzZXJAaGFja2VyAQIDBAU=
     chmod 600 /tmp/vuln_ssh/id_ed25519
     chown 33:33 /tmp/vuln_ssh/id_ed25519
 
-    # FOOLPROOF FIX: Create a custom Dockerfile that pre-installs SSH client
-    # The base image uses Debian Stretch (EOL), so we must update the apt sources to the archive.
-    cat << 'DOCKERFILE' > /tmp/Dockerfile
-    FROM vulnerables/web-dvwa
-    RUN echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list && \
-        apt-get update -o Acquire::Check-Valid-Until=false && \
-        apt-get install -y openssh-client
-    DOCKERFILE
+    # FOOLPROOF FIX: Create a custom Dockerfile using standard echo to avoid whitespace issues
+    echo 'FROM vulnerables/web-dvwa' > /tmp/Dockerfile
+    echo 'RUN rm -rf /etc/apt/sources.list.d/* && echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list && apt-get update -o Acquire::Check-Valid-Until=false && apt-get install -y --allow-unauthenticated openssh-client' >> /tmp/Dockerfile
 
     # Build the image locally (this runs synchronously and guarantees SSH is there)
     docker build -t custom-dvwa /tmp/
