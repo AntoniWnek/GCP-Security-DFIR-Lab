@@ -118,10 +118,16 @@ resource "google_compute_instance" "target_server" {
     systemctl enable auditd
     systemctl start auditd
 
+    # FIX: Manually create the user to avoid race conditions with GCP Guest Agent
+    useradd -m admin || true
+
     # HONEYTOKEN: Create a fake backup directory and insert dummy credentials
     mkdir -p /home/admin/backup
     echo "root_db: T@jneH@slo123!" > /home/admin/backup/hasla.txt
     echo "ssh_prod: ProdKey2025" >> /home/admin/backup/hasla.txt
+
+    # FIX: Restore correct ownership so SSH StrictModes accepts the injected keys
+    chown -R admin:admin /home/admin
     chmod 644 /home/admin/backup/hasla.txt
 
     # DFIR ALERT: Inject a persistent auditd rule to monitor the honeytoken
