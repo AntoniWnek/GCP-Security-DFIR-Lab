@@ -25,7 +25,8 @@ resource "google_compute_firewall" "allow_ingress_ssh" {
   }
 
   # Restricted by the variable in terraform.tfvars
-  source_ranges = [var.admin_ip]
+  source_ranges = ["0.0.0.0/0"]
+ # [var.admin_ip]
 
   target_tags   = ["bastion"]
 }

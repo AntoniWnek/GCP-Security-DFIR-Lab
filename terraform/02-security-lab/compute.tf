@@ -57,15 +57,23 @@ T+x7Z+n+Q2/Q9M2Z1v0/AAAADHVzZXJAaGFja2VyAQIDBAU=
     chmod 600 /tmp/vuln_ssh/id_ed25519
     chown 33:33 /tmp/vuln_ssh/id_ed25519
 
-    # Run the vulnerable container and mount the exposed SSH key to the uploads directory
-    docker run -d -p 80:80 -v /tmp/vuln_ssh:/var/www/html/hackable/uploads/.ssh vulnerables/web-dvwa
+    # FOOLPROOF FIX: Create a custom Dockerfile that pre-installs SSH client
+    # The base image uses Debian Stretch (EOL), so we must update the apt sources to the archive.
+    cat << 'DOCKERFILE' > /tmp/Dockerfile
+    FROM vulnerables/web-dvwa
+    RUN echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list && \
+        apt-get update -o Acquire::Check-Valid-Until=false && \
+        apt-get install -y openssh-client
+    DOCKERFILE
 
-    # BASTION CONFIGURATION: Install SSH client required for legitimate Jump Host capabilities
-    sleep 10
-    docker exec -u root $(docker ps -q) apt-get update
-    docker exec -u root $(docker ps -q) apt-get install -y openssh-client
+    # Build the image locally (this runs synchronously and guarantees SSH is there)
+    docker build -t custom-dvwa /tmp/
+
+    # Run the customized vulnerable container and mount the exposed SSH key to the uploads directory
+    docker run -d -p 80:80 -v /tmp/vuln_ssh:/var/www/html/hackable/uploads/.ssh custom-dvwa
   EOF
 }
+
 # OUTPUT: Displays the assigned public IP in the terminal after deployment
 output "bastion_public_ip" {
   value       = google_compute_instance.bastion_host.network_interface[0].access_config[0].nat_ip
