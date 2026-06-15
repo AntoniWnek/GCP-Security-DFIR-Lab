@@ -1,17 +1,32 @@
-# INGRESS: Allows SSH and Web traffic exclusively from admin's public IP
-resource "google_compute_firewall" "allow_ingress_bastion" {
-  name    = "allow-ingress-bastion"
+# INGRESS WEB: Publicly accessible Web Traffic (HTTP/HTTPS) for the vulnerable app
+resource "google_compute_firewall" "allow_ingress_web" {
+  name    = "allow-ingress-web"
   network = google_compute_network.dfir_vpc.id
 
   allow {
     protocol = "tcp"
-    ports    = ["22", "80", "443"]
+    ports    = ["80", "443"]
   }
 
-  # Uses the variable stored safely in terraform.tfvars
+  # 0.0.0.0/0 means ANY IP address can view the website
+  source_ranges = ["0.0.0.0/0"]
+
+  target_tags   = ["bastion"]
+}
+
+# INGRESS SSH: Restricts administrative access strictly to the Admin's IP
+resource "google_compute_firewall" "allow_ingress_ssh" {
+  name    = "allow-ingress-ssh"
+  network = google_compute_network.dfir_vpc.id
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  # Restricted by the variable in terraform.tfvars
   source_ranges = [var.admin_ip]
 
-  # Applies this rule only to machines with the "bastion" tag
   target_tags   = ["bastion"]
 }
 
@@ -20,9 +35,9 @@ resource "google_compute_firewall" "deny_egress_dmz" {
   name      = "deny-egress-dmz"
   network   = google_compute_network.dfir_vpc.id
   direction = "EGRESS"
-  
+
   # Lower priority (higher number), acts as a catch-all net
-  priority  = 1000
+  priority = 1000
 
   deny {
     protocol = "all"
@@ -57,5 +72,20 @@ resource "google_compute_firewall" "allow_ingress_internal_vulnerable" {
     protocol = "all"
   }
 
-  source_ranges = ["10.0.1.0/24"] 
+  source_ranges = ["10.0.1.0/24"]
+}
+
+# TEMP ALLOW EGRESS: The "Drawbridge" for provisioning
+resource "google_compute_firewall" "allow_egress_updates" {
+  name      = "allow-egress-updates-temp"
+  network   = google_compute_network.dfir_vpc.id
+  direction = "EGRESS"
+  priority  = 900
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443"]
+  }
+
+  destination_ranges = ["0.0.0.0/0"]
 }
