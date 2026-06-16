@@ -75,16 +75,3 @@ resource "google_compute_firewall" "allow_ingress_internal_vulnerable" {
   source_ranges = ["10.0.1.0/24"]
 }
 
-# TEMP ALLOW EGRESS: The "Drawbridge" for provisioning
-resource "google_compute_firewall" "allow_egress_updates" {
-  name      = "allow-egress-updates-temp"
-  network   = google_compute_network.dfir_vpc.id
-  direction = "EGRESS"
-  priority  = 900
-
-  allow {
-    protocol = "all"
-  }
-
-  destination_ranges = ["0.0.0.0/0"]
-}
