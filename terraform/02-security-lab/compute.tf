@@ -104,12 +104,12 @@ resource "google_compute_instance" "target_server" {
     scopes = ["cloud-platform"]
   }
 
-  # VULNERABILITY INJECTION: Public key matching the compromised private key on the Bastion
+  # Force disable GCP OS Login to ensure that manually injected local SSH keys are accepted
   metadata = {
-    ssh-keys = "admin:ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA/TwOJ1L1Z2z1rN+M/u7Jt5T+x7Z+n+Q2/Q9M2Z1v0/ user@hacker"
+    enable-oslogin = "FALSE"
   }
 
-  # Startup script installs audit daemon and provisions a canary file
+  # Startup script installs audit daemon, creates user manually, and injects keys
   metadata_startup_script = <<-EOF
     #!/bin/bash
     # Update package lists and install linux audit framework
@@ -118,15 +118,21 @@ resource "google_compute_instance" "target_server" {
     systemctl enable auditd
     systemctl start auditd
 
-    # FIX: Manually create the user to avoid race conditions with GCP Guest Agent
-    useradd -m admin || true
+    # FOOLPROOF FIX: Bypass GCP Guest Agent entirely. Create user and inject SSH key manually.
+    useradd -m -s /bin/bash admin || true
+    mkdir -p /home/admin/.ssh
+    echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA/TwOJ1L1Z2z1rN+M/u7Jt5T+x7Z+n+Q2/Q9M2Z1v0/ user@hacker" > /home/admin/.ssh/authorized_keys
+    
+    # Perfect permissions are MANDATORY for SSH to accept the key
+    chmod 700 /home/admin/.ssh
+    chmod 600 /home/admin/.ssh/authorized_keys
 
     # HONEYTOKEN: Create a fake backup directory and insert dummy credentials
     mkdir -p /home/admin/backup
     echo "root_db: T@jneH@slo123!" > /home/admin/backup/hasla.txt
     echo "ssh_prod: ProdKey2025" >> /home/admin/backup/hasla.txt
 
-    # FIX: Restore correct ownership so SSH StrictModes accepts the injected keys
+    # Restore correct ownership for everything in the home directory
     chown -R admin:admin /home/admin
     chmod 644 /home/admin/backup/hasla.txt
 
