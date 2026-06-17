@@ -1,0 +1,43 @@
+# ==============================================================================
+# THE "DRAWBRIDGE" PATTERN (TEMPORARY EGRESS FIREWALL RULE)
+# ==============================================================================
+# WARNING: This file is STRICTLY for the initial environment provisioning.
+# It allows the Bastion host to download necessary packages and Docker images from the internet.
+#
+# USAGE INSTRUCTIONS:
+# 1. Rename this file from `drawbridge_firewall.tf.example` to `drawbridge_firewall.tf`
+# 2. Run `terraform apply`
+# 3. Wait 2-3 minutes for the startup scripts to execute on the machine
+# 4. DELETE this file (or rename it back to .example) and run `terraform apply` again
+# ==============================================================================
+
+resource "google_compute_firewall" "allow_egress_dmz" {
+  name      = "allow-egress-dmz-temp"
+  network   = google_compute_network.custom_vpc.id # Make sure this matches your VPC resource name
+  direction = "EGRESS"
+  
+  # Higher priority (lower number) than a potential global DENY ALL egress rule
+  priority  = 900 
+
+  # Allow HTTP/HTTPS traffic required to fetch packages and images
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443"]
+  }
+
+  # Allow DNS resolution
+  allow {
+    protocol = "udp"
+    ports    = ["53"]
+  }
+  allow {
+    protocol = "tcp"
+    ports    = ["53"]
+  }
+
+  # Apply rule only to machines with the bastion tag
+  target_tags = ["bastion"]
+  
+  # Destination: The entire internet
+  destination_ranges = ["0.0.0.0/0"]
+}
