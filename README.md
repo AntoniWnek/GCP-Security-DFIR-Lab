@@ -1,8 +1,8 @@
-[🇵🇱 Wersja Polska](#wersja-polska) | [🇬🇧 English Version](#english-version)
+[PL](#pl) | [EN](#en)
 
 ---
 
-<a id="wersja-polska"></a>
+<a id="pl"></a>
 # Wersja Polska: GCP Enterprise Security Lab & DFIR Pipeline
 
 **TL;DR:** Infrastruktura jako kod (IaC) wdrażająca w Google Cloud środowisko typu Zero-Trust do symulacji ataków i analizy śledczej. Projekt demonstruje pełen łańcuch ataku (Web Shell, SSH Key Hijacking, Lateral Movement) oraz automatyzuje routing logów (Auditd, VPC Flow) do bazy BigQuery w celu poszukiwania zagrożeń (Threat Hunting).
@@ -39,6 +39,8 @@ Proces wdrożenia wymaga tymczasowego otwarcia zapory (tzw. mostu zwodzonego) w 
 3. Credential Harvesting: Zlokalizowanie niezabezpieczonego klucza prywatnego ED25519 oraz enumeracja kont systemowych.
 4. Lateral Movement: Wykorzystanie ataku typu Username Spraying przy użyciu przejętego klucza i utworzenie sesji SSH z odizolowaną maszyną wewnętrzną z pominięciem obostrzeń systemowych klienta.
 5. Data Exfiltration: Nieautoryzowany odczyt wrażliwych danych, generujący zdarzenia w demonie audytowym.
+
+Szczegółowy przebieg ataku krok po kroku (Walkthrough) znajduje się w dokumencie: [Red_Team_Walkthrough.md](./reports/Red_Team_Walkthrough.md)
 
 ## Scenariusz analizy śledczej (Blue Team / DFIR)
 
@@ -85,7 +87,7 @@ Pełny raport powłamaniowy (Post-Mortem), zawierający szczegółową analizę 
 ---
 ---
 
-<a id="english-version"></a>
+<a id="en"></a>
 # English Version: GCP Enterprise Security Lab & DFIR Pipeline
 
 **TL;DR:** Infrastructure as Code (IaC) deploying a Zero-Trust environment in Google Cloud for attack simulation and digital forensics. The project demonstrates a full kill chain (Web Shell, SSH Key Hijacking, Lateral Movement) and automates log routing (Auditd, VPC Flow) to BigQuery for Threat Hunting.
@@ -122,6 +124,8 @@ The environment allows for the execution of a complete Cyber Kill Chain:
 3. Credential Harvesting: Locating an unsecured ED25519 private key and enumerating system accounts.
 4. Lateral Movement: Executing a Username Spraying attack with the stolen key to establish a quiet SSH session with the isolated internal machine, bypassing local SSH client restrictions.
 5. Data Exfiltration: Unauthorized reading of sensitive data (honeytoken), triggering system audit alerts.
+
+A detailed, step-by-step attack walkthrough can be found in the following document: [Red_Team_Walkthrough.md](./reports/Red_Team_Walkthrough.md)
 
 ## Forensics and Defense Scenario (Blue Team / DFIR)
 
