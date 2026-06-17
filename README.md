@@ -25,7 +25,7 @@ Z uwagi na restrykcyjną politykę Google Cloud AUP oraz zasady minimalnego uprz
 
 Proces wdrożenia wymaga tymczasowego otwarcia zapory (tzw. mostu zwodzonego) w celu pobrania obrazów aplikacji podatnej:
 
-1. Wdrożenie infrastruktury z tymczasową regułą zezwalającą na pobranie pakietów HTTP/HTTPS. [Kod źródłowy reguły](./terraform/02-security-lab/drawbridge_firewall.tf.example)
+1. Wdrożenie infrastruktury z tymczasową regułą zezwalającą na pobranie pakietów HTTP/HTTPS. Kod źródłowy reguły: [drawbridge_firewall.tf.example](./terraform/02-security-lab/drawbridge_firewall.tf.example)
 2. Inicjalizacja kontenerów Docker na maszynie brzegowej (Bastion).
 3. Usunięcie reguły Egress z konfiguracji Terraform i ponowna aplikacja stanu (`terraform apply`).
 4. Pełna izolacja środowiska. Złośliwy ruch wychodzący jest blokowany przez zaporę, jednak próby połączeń są logowane i przesyłane do analizy.
@@ -110,7 +110,7 @@ To comply with Google Cloud's Acceptable Use Policy (AUP) and enforce the princi
 
 The provisioning process requires temporarily opening the firewall (the "drawbridge") to pull necessary application images:
 
-1. Deploy infrastructure with a temporary rule allowing outbound HTTP/HTTPS traffic. [View rule source code](./terraform/02-security-lab/drawbridge_firewall.tf.example)
+1. Deploy infrastructure with a temporary rule allowing outbound HTTP/HTTPS traffic. Rule source code: [drawbridge_firewall.tf.example](./terraform/02-security-lab/drawbridge_firewall.tf.example)
 2. Wait for Docker containers to initialize on the Bastion host.
 3. Remove the Egress rule from the Terraform configuration and reapply the state (`terraform apply`).
 4. Full isolation is achieved. Malicious outbound traffic is blocked by the firewall, while connection attempts are logged and routed for analysis.
