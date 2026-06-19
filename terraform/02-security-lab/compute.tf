@@ -11,6 +11,13 @@ resource "google_service_account" "honeypot_sa" {
   description  = "Empty Service Account for machines to prevent Metadata SSRF attacks"
 }
 
+# FIX: Grant the minimal Service Account the ability to write logs to Google Cloud Logging
+resource "google_project_iam_member" "honeypot_log_writer" {
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.honeypot_sa.email}"
+}
+
 # BASTION HOST / HONEYPOT (DMZ)
 resource "google_compute_instance" "bastion_host" {
   name         = "bastion-dvwa"
@@ -45,9 +52,13 @@ resource "google_compute_instance" "bastion_host" {
   metadata_startup_script = <<-EOF
     #!/bin/bash
     apt-get update
-    apt-get install -y docker.io
+    apt-get install -y docker.io auditd audispd-plugins
     systemctl start docker
     systemctl enable docker
+    systemctl enable auditd
+    systemctl start auditd
+
+    auditctl -a always,exit -F arch=b64 -S execve -k BASTION_CMD
 
     # VULNERABILITY: Admin left a private SSH key mapped to the web directory
     mkdir -p /tmp/vuln_ssh
@@ -68,6 +79,36 @@ resource "google_compute_instance" "bastion_host" {
     
     # Run the customized vulnerable container and mount the exposed SSH key to the uploads directory
     docker run -d -p 80:80 -v /tmp/vuln_ssh:/var/www/html/hackable/uploads/.ssh custom-dvwa
+
+    # TELEMETRY: Wait for system init, clear apt locks, and install Ops Agent with a retry loop
+    sleep 20
+    sudo apt-get update --fix-missing
+    
+    for i in {1..5}; do
+      curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh && \
+      sudo bash add-google-cloud-ops-agent-repo.sh --also-install && break || \
+      (echo "Ops Agent install failed, retrying in 10s..." && sleep 10)
+    done
+
+    cat << 'EOF_CONFIG' > /etc/google-cloud-ops-agent/config.yaml
+    logging:
+      receivers:
+        audit_log:
+          type: files
+          include_paths:
+          - /var/log/audit/audit.log
+        syslog:
+          type: files
+          include_paths:
+          - /var/log/messages
+          - /var/log/syslog
+          - /var/log/auth.log
+      service:
+        pipelines:
+          default_pipeline:
+            receivers: [audit_log, syslog]
+    EOF_CONFIG
+    systemctl restart google-cloud-ops-agent
   EOF
 }
 
@@ -146,5 +187,35 @@ resource "google_compute_instance" "target_server" {
     # -p rwa triggers on Read, Write, or Attribute changes
     # -k assigns a unique filter key for SIEM/BigQuery indexing
     auditctl -w /home/admin/backup/hasla.txt -p rwa -k HONEYTOKEN_TRIGGERED
+
+    # TELEMETRY: Wait for system init, clear apt locks, and install Ops Agent with a retry loop
+    sleep 20
+    sudo apt-get update --fix-missing
+
+    for i in {1..5}; do
+      curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh && \
+      sudo bash add-google-cloud-ops-agent-repo.sh --also-install && break || \
+      (echo "Ops Agent install failed, retrying in 10s..." && sleep 10)
+    done
+
+    cat << 'EOF_CONFIG' > /etc/google-cloud-ops-agent/config.yaml
+    logging:
+      receivers:
+        audit_log:
+          type: files
+          include_paths:
+          - /var/log/audit/audit.log
+        syslog:
+          type: files
+          include_paths:
+          - /var/log/messages
+          - /var/log/syslog
+          - /var/log/auth.log
+      service:
+        pipelines:
+          default_pipeline:
+            receivers: [audit_log, syslog]
+    EOF_CONFIG
+    systemctl restart google-cloud-ops-agent
   EOF
 }
