@@ -28,6 +28,9 @@ resource "google_compute_subnetwork" "internal_subnet" {
   region        = "europe-central2"
   network       = google_compute_network.dfir_vpc.id
 
+  # Enables internal instances to reach Google APIs (e.g., Cloud Logging) without public IPs
+  private_ip_google_access = true
+
   # VPC Flow Logs
   log_config {
     aggregation_interval = "INTERVAL_5_SEC"

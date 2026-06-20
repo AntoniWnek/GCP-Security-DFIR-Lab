@@ -30,6 +30,24 @@ resource "google_compute_firewall" "allow_ingress_ssh" {
   target_tags   = ["bastion"]
 }
 
+# EGRESS - TELEMETRY: Allows instances to send logs to Google Cloud APIs (Private Google Access)
+resource "google_compute_firewall" "allow_egress_telemetry" {
+  name      = "allow-egress-telemetry"
+  network   = google_compute_network.dfir_vpc.id
+  direction = "EGRESS"
+  
+  # Higher priority (lower number) than the deny-egress-dmz rule
+  priority  = 900
+
+  allow {
+    protocol = "tcp"
+    ports    = ["443"]
+  }
+
+  # Restricted Virtual IP ranges for Google APIs (private.googleapis.com / restricted.googleapis.com)
+  destination_ranges = ["199.36.153.4/30", "199.36.153.8/30"]
+}
+
 # EGRESS - BASELINE: Blocks all other outbound traffic initiated from the DMZ (Zero Trust)
 resource "google_compute_firewall" "deny_egress_dmz" {
   name      = "deny-egress-dmz"
@@ -74,4 +92,3 @@ resource "google_compute_firewall" "allow_ingress_internal_vulnerable" {
 
   source_ranges = ["10.0.1.0/24"]
 }
-
