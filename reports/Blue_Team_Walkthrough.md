@@ -27,7 +27,8 @@ ORDER BY
 LIMIT 10;
 ```
 
-<img width="786" height="298" alt="image" src="[https://github.com/user-attachments/assets/4458eb49-c97e-4bac-a8aa-b22c906db2c5](https://github.com/user-attachments/assets/4458eb49-c97e-4bac-a8aa-b22c906db2c5)" />
+<img width="786" height="296" alt="image" src="https://github.com/user-attachments/assets/66dae6b7-2169-4b87-9eea-a0b0daf41755" />
+
 
 
 ### 1.2 Most Targeted Ports by External Threats
@@ -48,7 +49,8 @@ ORDER BY
 LIMIT 5;
 ```
 
-<img width="311" height="162" alt="image" src="[https://github.com/user-attachments/assets/83ca4e47-a071-43d3-af6e-0bb7d99ac1b9](https://github.com/user-attachments/assets/83ca4e47-a071-43d3-af6e-0bb7d99ac1b9)" />
+<img width="311" height="159" alt="image" src="https://github.com/user-attachments/assets/7c3108a6-e72a-4746-8088-2a08a5ea87c1" />
+
 
 
 ### 1.3 Data Exfiltration Volume Anomaly
@@ -74,7 +76,8 @@ ORDER BY
 LIMIT 5;
 ```
 
-<img width="709" height="164" alt="image" src="[https://github.com/user-attachments/assets/da86e422-6f37-457b-a967-5703de25f870](https://github.com/user-attachments/assets/da86e422-6f37-457b-a967-5703de25f870)" />
+<img width="726" height="160" alt="image" src="https://github.com/user-attachments/assets/26904a99-3509-45ac-8690-a3fd6aa0cd73" />
+
 
 
 ---
