@@ -3,7 +3,7 @@
 ---
 
 <a id="pl"></a>
-# Wersja Polska: GCP Enterprise Security Lab & DFIR Pipeline
+# GCP Enterprise Security Lab & DFIR Pipeline
 
 **TL;DR:** Infrastruktura jako kod (IaC) wdrażająca w Google Cloud środowisko typu Zero-Trust do symulacji ataków i analizy śledczej. Projekt demonstruje pełen łańcuch ataku (Web Shell, SSH Key Hijacking, Lateral Movement) oraz automatyzuje routing logów (Auditd, VPC Flow) do bazy BigQuery w celu poszukiwania zagrożeń (Threat Hunting).
 
@@ -50,6 +50,8 @@ Po wykonaniu ataku, laboratorium umożliwia realizację zadań defensywnych:
 2. Threat Hunting: Wykorzystanie zapytań SQL do filtrowania logów, odseparowania ruchu tła i identyfikacji anomalii sieciowych.
 3. Incident Response: Wyodrębnienie wskaźników kompromitacji (IoC) i przygotowanie dokumentacji powłamaniowej.
 
+Szczegółowy przewodnik po analizie logów i Threat Huntingu (Walkthrough) znajduje się w dokumencie: [Blue_Team_Walkthrough.md](./reports/Blue_Team_Walkthrough.md)
+
 ## Instrukcja wdrożenia
 
 Projekt został podzielony na dwie niezależne warstwy: trwałą (infrastruktura danych) oraz ulotną (właściwe środowisko testowe). Wymagane jest posiadanie uprawnień Owner/Editor w projekcie GCP.
@@ -80,15 +82,13 @@ terraform apply -auto-approve
 Pełny raport powłamaniowy (Post-Mortem), zawierający szczegółową analizę logów, oś czasu zdarzeń (Timeline) oraz zidentyfikowane wskaźniki kompromitacji (IoC), znajduje się w katalogu z raportami:
 [Incident_Response_Report.md](./reports/Incident_Response_Report.md)
 
-*Zrzuty surowych logów oraz robocze zapytania SQL wykorzystane podczas analizy dostępne są w katalogu `/docs`.*
-
 **Zastrzeżenie:** Repozytorium zawiera kod wdrażający celowo podatne oprogramowanie oraz osłabione mechanizmy bezpieczeństwa. Służy ono wyłącznie celom badawczym i edukacyjnym w izolowanych środowiskach. Nie należy wdrażać tego kodu w środowiskach produkcyjnych.
 
 ---
 ---
 
 <a id="en"></a>
-# English Version: GCP Enterprise Security Lab & DFIR Pipeline
+# GCP Enterprise Security Lab & DFIR Pipeline
 
 **TL;DR:** Infrastructure as Code (IaC) deploying a Zero-Trust environment in Google Cloud for attack simulation and digital forensics. The project demonstrates a full kill chain (Web Shell, SSH Key Hijacking, Lateral Movement) and automates log routing (Auditd, VPC Flow) to BigQuery for Threat Hunting.
 
@@ -135,6 +135,8 @@ Following the attack execution, the lab facilitates defensive operations:
 2. Threat Hunting: Utilizing SQL queries to filter logs, separate background noise, and identify network anomalies.
 3. Incident Response: Extracting Indicators of Compromise (IoCs) and compiling an incident report.
 
+A detailed, step-by-step Threat Hunting and log analysis walkthrough can be found in the following document: [Blue_Team_Walkthrough.md](./reports/Blue_Team_Walkthrough.md)
+
 ## Deployment Guide
 
 The project is structured into two independent layers: a persistent data foundation and an ephemeral testing environment. Owner/Editor permissions in a GCP project are required.
@@ -164,7 +166,5 @@ terraform apply -auto-approve
 
 The comprehensive Post-Mortem incident report, containing detailed log analysis, an attack timeline, and identified IoCs, can be found in the reports directory:
 [Incident_Response_Report.md](./reports/Incident_Response_Report.md)
-
-*Raw log dumps and working SQL queries used during the analysis are stored in the `/docs` directory.*
 
 **Disclaimer:** This repository contains code that intentionally deploys vulnerable software and weakened security configurations. It is intended strictly for educational and research purposes in isolated environments. Do not deploy this code in production networks.
