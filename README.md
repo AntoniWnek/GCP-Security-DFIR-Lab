@@ -143,8 +143,8 @@ The project is structured into two independent layers: a persistent data foundat
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/[YOUR_GITHUB]/[REPO_NAME].git
-cd [REPO_NAME]/terraform
+git clone https://github.com/AntoniWnek/GCP-Security-DFIR-Lab.git
+cd GCP-Security-DFIR-Lab/terraform
 
 # 2. Deploy the data foundation (BigQuery)
 cd 01-data-foundation
