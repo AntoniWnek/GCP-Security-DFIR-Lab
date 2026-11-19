@@ -58,8 +58,8 @@ Projekt został podzielony na dwie niezależne warstwy: trwałą (infrastruktura
 
 ```bash
 # 1. Klonowanie repozytorium
-git clone https://github.com/[TWÓJ_GITHUB]/[NAZWA_REPO].git
-cd [NAZWA_REPO]/terraform
+git clone https://github.com/AntoniWnek/GCP-Security-DFIR-Lab.git
+cd GCP-Security-DFIR-Lab/terraform
 
 # 2. Wdrożenie warstwy trwałej (BigQuery)
 cd 01-data-foundation
